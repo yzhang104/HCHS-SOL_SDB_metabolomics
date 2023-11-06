@@ -155,7 +155,11 @@ sdbpc_corr<-jtools::svycor(~Age+BMI+REI3+REI0+HB+avgEventLength+avgSpO2+minSpO2+
 # to ensure the values are within [-1,1] range for plotting
 sdbpc_corr$cors[sdbpc_corr$cors>1]<-1
 
+figure2<-corrplot(sdbpc_corr$cors, method="number",type = "upper", order = "original", p.mat = sdbpc_corr$p.values,insig="pch",tl.col = "black", tl.srt = 90)
+
 # export the correlation plot
-jpeg("output/fig2.jpg")
+jpeg("output/fig2.jpg", width = 800, height = 600)
 print(corrplot(sdbpc_corr$cors, method="number",type = "upper", order = "original", p.mat = sdbpc_corr$p.values,insig="pch",tl.col = "black", tl.srt = 90))
+# Sleep for a second to ensure the plot is written to the file
+Sys.sleep(10)
 dev.off()
