@@ -430,7 +430,7 @@ qt_plot<-ggplot(qt_output[which(qt_output$model%in%c("model_2")&qt_output$Exposu
   scale_y_continuous(trans='log2')+
   coord_flip()
 # export the quartile associations plot
-jpeg("output/supple_figs4.jpg")
+jpeg("output/suppl_figs4.jpg", width = 800, height = 600)
 print(qt_plot)
 dev.off()
 
@@ -593,4 +593,4 @@ prevsdm_both_auc$baseline="PreDM"
 
 incident_both_auc<-rbind(inchtn_both_auc,incdm_both_auc,normvsdm_both_auc,prevsdm_both_auc)%>%
   dplyr::mutate(category=paste0(baseline,"-",outcome))
-write.csv(incident_both_auc,file="output/supple_tables13.csv",row.names = F)
+write.csv(incident_both_auc,file="output/suppl_tables13.csv",row.names = F)

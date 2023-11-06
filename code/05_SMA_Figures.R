@@ -566,7 +566,7 @@ validated_sdbpc1_plot<-ggplot(batch1_batch2_sma[which(batch1_batch2_sma$chemid_x
   geom_errorbar(aes(min = lower95, max = upper95), size = 0.75, 
                 width = 0.5, position = position_dodge(width = 0.8)) +
   geom_point(position = position_dodge(width = 0.8), color = "black",size=0.8) +
-  geom_text(aes(label = p_label, color = model_batch, group = model_batch),position = position_dodge(width=0.8),hjust=-1.5,vjust=0.5)+
+  geom_text(aes(label = p_label, color = model_batch, group = model_batch),position = position_dodge(width=0.8),hjust=-1.5,vjust=0.2)+
   geom_hline(yintercept=0, linetype="dashed",color = "red", size=0.5)+
   theme_bw()+ scale_color_brewer(palette="Paired")+
   coord_flip()+ ggtitle("SDB PC1")  +xlab("")+
@@ -576,7 +576,7 @@ validated_sdbpc2_plot<-ggplot(batch1_batch2_sma[which(batch1_batch2_sma$chemid_x
   geom_errorbar(aes(min = lower95, max = upper95), size = 0.75, 
                 width = 0.5, position = position_dodge(width = 0.8)) +
   geom_point(position = position_dodge(width = 0.8), color = "black",size=0.8) +
-  geom_text(aes(label = p_label, color = model_batch, group = model_batch),position = position_dodge(width=0.8),hjust=-1.5,vjust=0.5)+
+  geom_text(aes(label = p_label, color = model_batch, group = model_batch),position = position_dodge(width=0.8),hjust=-1.5,vjust=0.2)+
   geom_hline(yintercept=0, linetype="dashed",color = "red", size=0.5)+
   theme_bw()+ scale_color_brewer(palette="Paired")+
   coord_flip()+ ggtitle("SDB PC2")  +xlab("")+
@@ -589,13 +589,13 @@ annotate_figure(validated_bar_plot,
                 top = text_grob("Associations between SDB PCs and metabolites\nvalidated in HCHS/SOL batch 2", color = "black", face = "bold", size = 14))
 
 # export the scree plot
-jpeg("output/fig4.jpg")
+jpeg("output/fig4.jpg", width = 600, height = 600)
 print(validated_bar_plot)
 dev.off()
 
 #######################
 # Supplemental Figure S6
-sma_7_results_append<-read.csv(file="output/sma_7sdb_results_b1.csv")
+sma_7_results_append<-read.csv(file="output/suppl_fig_s6_data.csv")
 outcome_rename_7_var<-c("HB","avgSpO2","minSpO2","REI0","Per90","REI3","avgEventLength","sdb_pc1","sdb_pc2")
 sma7_metab_b1<-as.character(unique(sma_7_results_append[which(sma_7_results_append$p_val_fdr<0.05),"metabolite"]))
 

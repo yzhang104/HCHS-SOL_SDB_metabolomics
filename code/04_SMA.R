@@ -1,7 +1,7 @@
 #################################
 # Single Metabolite Association Analysis
 
-# Generate Supplemental Table S2, S4, S5, S6, S7, Supplemental Figure S5
+# Generate Supplemental Table S2, S4, S5, S6, Supplemental Figure S5
 
 source("code/00_functions.R")
 library_list<-c("tidyverse","labelled","stringr","dplyr","plyr","ggplot2","factoextra","survey","purrr","e1071","ggpubr")
@@ -141,7 +141,7 @@ main_mdl_b1<-rbind(sdbpc1_imp_mdl1,sdbpc1_imp_mdl2,sdbpc1_imp_mdl3,sdbpc1_imp_md
   dplyr::rename(chemid_x=metabolite)%>%
   merge(.,hchs_b2_annot[,c("chemid_x","chemical_name")],by="chemid_x")
 
-write.csv(main_mdl_b1,file="output/suppl_table_s4.csv",row.names = F)
+write.csv(main_mdl_b1[,c("chemical_name","beta","se","n","p_val","p_val_fdr","is_continuous","model" ,"strata","trait","super_pathway","sub_pathway")],file="output/suppl_table_s4.csv",row.names = F)
 
 # Interaction analysis
 # metabolites that are significant in batch 1 model 1 stratified SMA
@@ -288,9 +288,9 @@ sdbpc2_imp_mdl3_strat_b2<-rbind(sdbpc2_imp_cont_mdl3_strat_b2,sdbpc2_imp_bin_mdl
 
 main_mdl_b2<-rbind(sdbpc1_imp_mdl1_b2,sdbpc1_imp_mdl2_b2,sdbpc1_imp_mdl3_b2,sdbpc1_imp_mdl1_strat_b2,sdbpc1_imp_mdl2_strat_b2,sdbpc1_imp_mdl3_strat_b2,sdbpc2_imp_mdl1_b2,sdbpc2_imp_mdl2_b2,sdbpc2_imp_mdl3_b2,sdbpc2_imp_mdl1_strat_b2,sdbpc2_imp_mdl2_strat_b2,sdbpc2_imp_mdl3_strat_b2)%>%
   dplyr::rename(chemid_x=metabolite)%>%
-  merge(.,hchs_b2_annot[,c("chemid_x","chemical_name","hmdb")],by="chemid_x")
+  merge(.,hchs_b2_annot[,c("chemid_x","chemical_name","hmdb","super_pathway","sub_pathway")],by="chemid_x")
 
-write.csv(main_mdl_b2, file = "output/suppl_table_s4_b2.csv",row.names = F)
+write.csv(main_mdl_b2[,c("chemical_name","beta","se","n","p_val","p_val_fdr","is_continuous","model" ,"strata","trait","super_pathway","sub_pathway")], file = "output/suppl_table_s4_b2.csv",row.names = F)
 
 # Replication in batch 2
 main_mdl_b1<-main_mdl_b1%>%
@@ -394,15 +394,16 @@ batch1_batch2_sdbpc1_sma<-merge(batch1_sdbpc1_main[,c("chemid_x","beta","se","lo
 batch1_batch2_sdbpc2_sma<-merge(batch1_sdbpc2_main[,c("chemid_x","beta","se","lower95","upper95","n","p_val","p_val_fdr","chemical_name","model","metabolite_mdl")],batch2_sdbpc2_main[,c("beta","se","lower95","upper95","n","p_val","onesided_p","fdr_one_sided_p","metabolite_mdl")],all.y=TRUE,by="metabolite_mdl",suffixes = c("_b1","_b2"))%>%
   merge(.,hchs_annot[,c("sub_pathway","super_pathway","chemical_name","hmdb")],by="chemical_name",all.x=T)
 
-batch1_batch2_sdbpc1_gender_sma<-merge(batch1_sdbpc1_gender_main[,c("chemid_x","beta","se","lower95","upper95","n","p_val","p_val_fdr","chemical_name","model","metabolite_mdl","strata")],batch2_sdbpc1_gender_main[,c("beta","se","lower95","upper95","n","p_val","onesided_p","fdr_one_sided_p","metabolite_mdl")],all.y=TRUE,by="metabolite_mdl",suffixes = c("_b1","_b2"))%>%
+batch1_batch2_sdbpc1_gender_sma<-merge(batch1_sdbpc1_gender_main[,c("chemid_x","beta","se","lower95","upper95","n","p_val","p_val_fdr","chemical_name","model","is_continuous","metabolite_mdl","strata")],batch2_sdbpc1_gender_main[,c("beta","se","lower95","upper95","n","p_val","onesided_p","fdr_one_sided_p","metabolite_mdl")],all.y=TRUE,by="metabolite_mdl",suffixes = c("_b1","_b2"))%>%
   merge(.,hchs_annot[,c("sub_pathway","super_pathway","chemical_name","hmdb")],by="chemical_name",all.x=T)%>%
   dplyr::mutate(trait="sdb_pc1")
 
-batch1_batch2_sdbpc2_gender_sma<-merge(batch1_sdbpc2_gender_main[,c("chemid_x","beta","se","lower95","upper95","n","p_val","p_val_fdr","chemical_name","model","metabolite_mdl","strata")],batch2_sdbpc2_gender_main[,c("beta","se","lower95","upper95","n","p_val","onesided_p","fdr_one_sided_p","metabolite_mdl")],all.y=TRUE,by="metabolite_mdl",suffixes = c("_b1","_b2"))%>%
+batch1_batch2_sdbpc2_gender_sma<-merge(batch1_sdbpc2_gender_main[,c("chemid_x","beta","se","lower95","upper95","n","p_val","p_val_fdr","chemical_name","model","is_continuous","metabolite_mdl","strata")],batch2_sdbpc2_gender_main[,c("beta","se","lower95","upper95","n","p_val","onesided_p","fdr_one_sided_p","metabolite_mdl")],all.y=TRUE,by="metabolite_mdl",suffixes = c("_b1","_b2"))%>%
   merge(.,hchs_annot[,c("sub_pathway","super_pathway","chemical_name","hmdb")],by="chemical_name",all.x=T)%>%
   dplyr::mutate(trait="sdb_pc2")
 
-batch1_batch2_gender_sma<-rbind(batch1_batch2_sdbpc1_gender_sma,batch1_batch2_sdbpc2_gender_sma)
+batch1_batch2_gender_sma<-rbind(batch1_batch2_sdbpc1_gender_sma,batch1_batch2_sdbpc2_gender_sma)%>%
+  dplyr::select(-metabolite_mdl)
 write.csv(batch1_batch2_gender_sma, file = "output/suppl_table_s5.csv",row.names = F)
 
 # export the batch 1 and batch 2 validated sma results
