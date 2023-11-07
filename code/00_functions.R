@@ -832,6 +832,8 @@ quartile_association_models_output_offset<-function(model_list,dataset){
   qt4_pvalue<-rep(NA,length(model_list))
   exposure<-rep(NA,length(model_list))
   covariates<-rep(NA,length(model_list))
+  out_nobs<-rep(NA,length(model_list))
+  
   number<-1
   for (i in 1:length(model_list)){
     Vcov <- vcov(model_list[[i]], useScale = FALSE)
@@ -850,6 +852,8 @@ quartile_association_models_output_offset<-function(model_list,dataset){
     qt4_pvalue[number] = as.numeric(pval[length(beta)])
     exposure[number]=substr(names(beta)[length(names(beta))],1,nchar(names(beta)[length(names(beta))])-1)
     predictors=paste(model_list[[i]]$formula[3])
+    out_nobs[number]=as.numeric(nobs(model_list[[i]]))
+    
     # covariates[number]=stringr::str_extract(predictors,".*(?=[+])")
     pattern <- "^(.*?)\\+(.*?\\+[^+]+)$"
     covariates[number]=sub(pattern, "\\1", predictors)
@@ -858,9 +862,9 @@ quartile_association_models_output_offset<-function(model_list,dataset){
     }
     number<-number+1
   }
-  qt2_output<-data.frame(beta=qt2_beta,se=qt2_se,pval=qt2_pvalue,Quartile=rep("2nd",length(model_list)),Exposure=exposure,Covariate=covariates)
-  qt3_output<-data.frame(beta=qt3_beta,se=qt3_se,pval=qt3_pvalue,Quartile=rep("3rd",length(model_list)),Exposure=exposure,Covariate=covariates)        
-  qt4_output<-data.frame(beta=qt4_beta,se=qt4_se,pval=qt4_pvalue,Quartile=rep("4th",length(model_list)),Exposure=exposure,Covariate=covariates)        
+  qt2_output<-data.frame(beta=qt2_beta,se=qt2_se,pval=qt2_pvalue,Quartile=rep("2nd",length(model_list)),Exposure=exposure,Covariate=covariates,n=out_nobs)
+  qt3_output<-data.frame(beta=qt3_beta,se=qt3_se,pval=qt3_pvalue,Quartile=rep("3rd",length(model_list)),Exposure=exposure,Covariate=covariates,n=out_nobs)        
+  qt4_output<-data.frame(beta=qt4_beta,se=qt4_se,pval=qt4_pvalue,Quartile=rep("4th",length(model_list)),Exposure=exposure,Covariate=covariates,n=out_nobs)        
   qt_output<-rbind(qt2_output,qt3_output,qt4_output)%>%
     dplyr::mutate(OR=exp(beta),
                   lowerCI=exp(beta-1.96*se),

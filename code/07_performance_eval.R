@@ -13,8 +13,10 @@ all_score_combined<-read.csv(file="data/sdb_mrs_scores.csv")
 # read in time elapse between v1v2 and age calculated at visit 2
 add_var<-read.csv("data/mcimet_covariates_20200716.csv",stringsAsFactors = F)%>%
   dplyr::select(ID,YRS_BTWN_V1V2,age_baseline_from_v2)
+add_var <- unique(add_var)
 pheno_pca<-merge(pheno_pca,add_var,by="ID",all.x=T)%>%
-  dplyr::mutate(AGE=age_baseline_from_v2,
+  dplyr::mutate(AGE_v1=AGE,
+                AGE=age_baseline_from_v2,
                 AGE_RAW=age_baseline_from_v2,
                 time_y1y2=YRS_BTWN_V1V2)
 
@@ -35,7 +37,7 @@ pheno_all_score_combined$log_HB<-(log(pheno_all_score_combined$HB)-pheno_all_sco
 # standardize HB and REI
 pheno_all_score_combined$BMI_RAW<-pheno_all_score_combined$BMI
 
-pheno_all_score_combined[,c("REI3","HB","AGE","BMI")]<-pheno_all_score_combined[,c("REI3","HB","AGE","BMI")]%>%scale()
+pheno_all_score_combined[,c("REI3","HB","AGE","AGE_v1","BMI")]<-pheno_all_score_combined[,c("REI3","HB","AGE","AGE_v1","BMI")]%>%scale()
 # create quartiles within combined batch
 pheno_all_score_combined$sdbpc1_mrs_qt<-factor(ntile(pheno_all_score_combined$sdbpc1_mrs,4))
 pheno_all_score_combined$sdbpc2_mrs_qt<-factor(ntile(pheno_all_score_combined$sdbpc2_mrs,4))
@@ -63,6 +65,15 @@ covariate_both_list<-list(
 covariate_gender_list<-list(
   mdl1_gender_covar=c("AGE","BMI","CENTER","background"),
   mdl2_gender_covar=c("AGE","BMI","CENTER","background","ALCOHOL_USE","CIGARETTE_USE","GPAQ_TOTAL_MET","AHEI2010")
+)
+
+covariate_base_list<-list(
+  mdl1_both_covar=c("AGE_v1","BMI","GENDER","CENTER","background"),
+  mdl2_both_covar=c("AGE_v1","BMI","GENDER","CENTER","background","ALCOHOL_USE","CIGARETTE_USE","GPAQ_TOTAL_MET","AHEI2010")
+)
+covariate_gender_base_list<-list(
+  mdl1_gender_covar=c("AGE_v1","BMI","CENTER","background"),
+  mdl2_gender_covar=c("AGE_v1","BMI","CENTER","background","ALCOHOL_USE","CIGARETTE_USE","GPAQ_TOTAL_MET","AHEI2010")
 )
 
 # Define the survey design
@@ -153,12 +164,12 @@ row.names(metab_gender_qt_mdl_index)<-names(covariate_gender_list)
 colnames(metab_gender_qt_mdl_index)<-all_biomarker_qt_var
 
 # loop association for SDB PCs~MRS in batch 1
-b1_sdbpc1_both_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_both_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&batch=="b1"),outcome_var="sdb_pc1")
-b1_sdbpc1_female_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_gender_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&GENDER=="Female"&batch=="b1"),outcome_var="sdb_pc1")
-b1_sdbpc1_male_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_gender_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&GENDER=="Male"&batch=="b1"),outcome_var="sdb_pc1")
-b1_sdbpc2_both_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_both_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&batch=="b1"),outcome_var="sdb_pc2")
-b1_sdbpc2_female_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_gender_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&GENDER=="Female"&batch=="b1"),outcome_var="sdb_pc2")
-b1_sdbpc2_male_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_gender_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&GENDER=="Male"&batch=="b1"),outcome_var="sdb_pc2")
+b1_sdbpc1_both_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_base_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&batch=="b1"),outcome_var="sdb_pc1")
+b1_sdbpc1_female_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_gender_base_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&GENDER=="Female"&batch=="b1"),outcome_var="sdb_pc1")
+b1_sdbpc1_male_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_gender_base_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&GENDER=="Male"&batch=="b1"),outcome_var="sdb_pc1")
+b1_sdbpc2_both_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_base_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&batch=="b1"),outcome_var="sdb_pc2")
+b1_sdbpc2_female_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_gender_base_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&GENDER=="Female"&batch=="b1"),outcome_var="sdb_pc2")
+b1_sdbpc2_male_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_gender_base_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&GENDER=="Male"&batch=="b1"),outcome_var="sdb_pc2")
 
 # extract output
 b1_sdbpc1_both_output<-extract_mdl_sig_output(model_output_list=b1_sdbpc1_both_mdl_list,model_index_matrix=metab_nosdbpc_both_mdl_index,model_outcome="sdb_pc1",model_strata="both")
@@ -176,12 +187,12 @@ b1_sdbpc_output<-b1_sdbpc_output_all%>%
 
 ##################
 # loop association for SDB PCs~mrsx in batch 2
-b2_sdbpc1_both_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_both_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&batch=="b2"),outcome_var="sdb_pc1")
-b2_sdbpc1_female_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_gender_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&GENDER=="Female"&batch=="b2"),outcome_var="sdb_pc1")
-b2_sdbpc1_male_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_gender_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&GENDER=="Male"&batch=="b2"),outcome_var="sdb_pc1")
-b2_sdbpc2_both_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_both_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&batch=="b2"),outcome_var="sdb_pc2")
-b2_sdbpc2_female_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_gender_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&GENDER=="Female"&batch=="b2"),outcome_var="sdb_pc2")
-b2_sdbpc2_male_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_gender_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&GENDER=="Male"&batch=="b2"),outcome_var="sdb_pc2")
+b2_sdbpc1_both_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_base_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&batch=="b2"),outcome_var="sdb_pc1")
+b2_sdbpc1_female_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_gender_base_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&GENDER=="Female"&batch=="b2"),outcome_var="sdb_pc1")
+b2_sdbpc1_male_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_gender_base_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&GENDER=="Male"&batch=="b2"),outcome_var="sdb_pc1")
+b2_sdbpc2_both_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_base_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&batch=="b2"),outcome_var="sdb_pc2")
+b2_sdbpc2_female_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_gender_base_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&GENDER=="Female"&batch=="b2"),outcome_var="sdb_pc2")
+b2_sdbpc2_male_mdl_list<-loop_association_analysis(exposure_list=all_biomarker_var[!all_biomarker_var%in%c("sdb_pc1","sdb_pc2")],covariate_list=covariate_gender_base_list,survey_design=subset(sdbpc_survey_design,!is.na(sdbpc1_mrs)&GENDER=="Male"&batch=="b2"),outcome_var="sdb_pc2")
 # extract output
 b2_sdbpc1_both_output<-extract_mdl_sig_output(model_output_list=b2_sdbpc1_both_mdl_list,model_index_matrix=metab_nosdbpc_both_mdl_index,model_outcome="sdb_pc1",model_strata="both")
 b2_sdbpc2_both_output<-extract_mdl_sig_output(model_output_list=b2_sdbpc2_both_mdl_list,model_index_matrix=metab_nosdbpc_both_mdl_index,model_outcome="sdb_pc2",model_strata="both")
@@ -380,8 +391,15 @@ combined_compare_dm_output$outcome<-"incident_dm"
 combined_output_all<-rbind(combined_inc_output_all,combined_compare_dm_output)
 write.csv(combined_inc_output_all,file="output/suppl_table_s12.csv",row.names = F)
 
-write.csv(qt_output,file="output/suppl_table_s14.csv",row.names = F)
 
+qt_output_summary<-qt_output%>%
+  dplyr::select(Exposure,Quartile,OR,lowerCI,upperCI,pval,model,n,strata,outcome,baseline)%>%
+  dplyr::filter(baseline%in%c("normal","norm+preDM"))%>%
+  dplyr::mutate(IRR=paste(round(OR,digits=2), "[", round(lowerCI,digits=2), ", ", round(upperCI,digits=2), "]", sep = ""))%>%
+  dplyr::select(Exposure,Quartile,IRR,pval,n,model,strata,outcome,baseline)
+write.csv(qt_output_summary,file="output/suppl_table_s14.csv",row.names = F)
+
+  
 # Generate Figure 5
 combined_inc_output_select<-combined_inc_output%>%
   dplyr::filter(!(trait=="sex_sdbpc1_mrs"&strata=="both"))%>%

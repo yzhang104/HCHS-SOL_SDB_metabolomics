@@ -154,6 +154,8 @@ survey.design.corr<-svydesign(id=~PSU_ID, strata=~STRAT,weights=~WEIGHT_FINAL_NO
 sdbpc_corr<-jtools::svycor(~Age+BMI+REI3+REI0+HB+avgEventLength+avgSpO2+minSpO2+Per90+SDBPC1+SDBPC2, design = survey.design.corr, digits = 4,na.rm=T, sig.stats = TRUE, bootn = 2000, mean1 = TRUE)
 # to ensure the values are within [-1,1] range for plotting
 sdbpc_corr$cors[sdbpc_corr$cors>1]<-1
+write.csv(sdbpc_corr$cors, file = "output/fig2_data_rho.csv",row.names = T)
+write.csv(sdbpc_corr$p.values, file = "output/fig2_data_p.csv",row.names = T)
 
 figure2<-corrplot(sdbpc_corr$cors, method="number",type = "upper", order = "original", p.mat = sdbpc_corr$p.values,insig="pch",tl.col = "black", tl.srt = 90)
 

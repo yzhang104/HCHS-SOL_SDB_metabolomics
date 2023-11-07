@@ -592,6 +592,9 @@ annotate_figure(validated_bar_plot,
 jpeg("output/fig4.jpg", width = 600, height = 600)
 print(validated_bar_plot)
 dev.off()
+#Export underlying data
+fig4_data<-rbind(batch1_batch2_sma[which(batch1_batch2_sma$chemid_x%in%validated_metabolite_pc1&batch1_batch2_sma$trait=="sdbpc1"),],batch1_batch2_sma[which(batch1_batch2_sma$chemid_x%in%validated_metabolite_pc2&batch1_batch2_sma$trait=="sdbpc2"),])
+write.csv(fig4_data, file = "output/fig4_data.csv",row.names = F)
 
 #######################
 # Supplemental Figure S6
